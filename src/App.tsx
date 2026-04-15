@@ -35,7 +35,7 @@ const RouteManager: React.FC = () => {
   const location = useLocation();
   
   // Check if current route should be public (no authentication required)
-  const isPublicRoute = location.pathname === '/oauth/consent'  || location.pathname === '/login';
+  const isPublicRoute = location.pathname.startsWith('/oauth/consent') || location.pathname.startsWith('/login');
   
   if (isPublicRoute) {
     return (
