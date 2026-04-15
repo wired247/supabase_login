@@ -1,15 +1,33 @@
 import { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import '@aws-amplify/ui-react/styles.css';
+import { supabase } from './supabaseClient.ts'
 import OAuthConsent from './OAuthConsent';
 import Login from './Login';
 import './App.css';
 
 const MainApp: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams()
+  const authorizationId = searchParams.get('authorization_id')
+  // Get redirect URL from query params
+  const redirectTo = searchParams.get('redirect') || '/';
 
   useEffect(() => {
-    // nothing to load here
-  }, []);
+    async function loadAuthDetails() {
+      if (authorizationId) {
+        // Handle auto-approved authorization_id?
+      }
+    }
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        navigate(redirectTo);
+      }
+    };
+    loadAuthDetails()
+    checkUser();
+  }, [navigate, authorizationId, redirectTo]);
 
   return (
     <main>
