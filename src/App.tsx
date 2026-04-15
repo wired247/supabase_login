@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import '@aws-amplify/ui-react/styles.css';
 import OAuthConsent from './OAuthConsent';
