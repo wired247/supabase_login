@@ -1,40 +1,68 @@
 import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import '@aws-amplify/ui-react/styles.css';
+import OAuthConsent from './OAuthConsent';
+import Login from './Login';
+import './App.css';
 
-const client = generateClient<Schema>();
-
-function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+const MainApp: React.FC = () => {
 
   useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
+    // nothing to load here
   }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
 
   return (
     <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
+      <h1>Amplify app</h1>
       <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
+        🥳 App successfully hosted.
       </div>
     </main>
   );
 }
+
+// Protected route wrapper component that requires authentication
+const DefaultRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div>
+      {children}
+    </div>
+  );
+};
+
+// Component that determines if route should be protected or public
+const RouteManager: React.FC = () => {
+  const location = useLocation();
+  
+  // Check if current route should be public (no authentication required)
+  const isPublicRoute = location.pathname === '/oauth/consent'  || location.pathname === '/login';
+  
+  if (isPublicRoute) {
+    return (
+      <Routes>
+        <Route path="/oauth/consent" element={<OAuthConsent />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    );
+  }
+  
+  // All other routes require authentication
+  return (
+    <DefaultRoute>
+      <Routes>
+        <Route path="/*" element={<MainApp />} />
+      </Routes>
+    </DefaultRoute>
+  );
+};
+
+// Main App component with routing
+const App: React.FC = () => {
+  return (
+    <Router>
+      <RouteManager />
+    </Router>
+  );
+};
 
 export default App;
