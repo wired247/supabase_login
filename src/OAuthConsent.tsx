@@ -88,6 +88,16 @@ export default function OAuthConsent() {
   if (error) return <div>Error: {error}</div>
   if (!authDetails) return <div>No authorization request found</div>
 
+  // ensure authDetails has client and scope properties before rendering table
+  if (!authDetails.client || !authDetails.scope) {
+    // redirect if authDetails has a redirect_url property, otherwise show error
+    if (authDetails.redirect_url) {
+      window.location.href = authDetails.redirect_url;
+      return null;
+    }
+    return <div>Invalid authorization request</div>;
+  }
+
   return (
     <div>
       <h1>Authorize {authDetails.client.name}</h1>
