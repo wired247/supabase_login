@@ -17,8 +17,11 @@ const Login: React.FC = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
+      console.log("Checking if user is already authenticated...");
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("Current user:", user);
       if (user) {
+        console.log("User is authenticated, navigating to:", redirectTo);
         navigate(redirectTo);
       }
     };
@@ -38,8 +41,11 @@ const Login: React.FC = () => {
       });
 
       if (error) {
+        console.log("Error during login:", error);
+
         setError(error.message);
       } else if (data.user) {
+        console.log("Login successful, navigating to:", redirectTo);
         setMessage('Login successful! Redirecting...');
         // Small delay to show success message
         setTimeout(() => {
@@ -47,6 +53,7 @@ const Login: React.FC = () => {
         }, 1000);
       }
     } catch (err) {
+      console.log("Unexpected error during login:", err);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);

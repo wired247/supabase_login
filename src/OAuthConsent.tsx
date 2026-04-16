@@ -16,6 +16,7 @@ export default function OAuthConsent() {
 
   useEffect(() => {
     async function loadAuthDetails() {
+      console.log("Loading authorization details for ID:", authorizationId);
       if (!authorizationId) {
         setError('Missing authorization_id')
         setLoading(false)
@@ -23,21 +24,27 @@ export default function OAuthConsent() {
       }
 
       // Check if user is authenticated
+      console.log("Checking user authentication status...");
       const {
         data: { user },
       } = await supabase.auth.getUser()
+      console.log("User authentication status:", user ? "Authenticated" : "Not authenticated");
 
       if (!user) {
+        console.log("User not authenticated, redirecting to login with redirect back to consent");
         navigate(`/login?redirect=${encodeURIComponent(`/oauth/consent?authorization_id=${authorizationId}`)}`)
         return
       }
 
       // Get authorization details using the authorization_id
       const { data, error } = await supabase.auth.oauth.getAuthorizationDetails(authorizationId)
+      console.log("Authorization details fetched:", data);
 
       if (error) {
+        console.log("Error fetching authorization details:", error);
         setError(error.message)
       } else {
+        console.log("Authorization details set in state:", data);
         setAuthDetails(data)
       }
 
@@ -53,8 +60,10 @@ export default function OAuthConsent() {
     const { data, error } = await supabase.auth.oauth.approveAuthorization(authorizationId)
 
     if (error) {
+      console.log("Error approving authorization:", error);
       setError(error.message)
     } else {
+      console.log("Authorization approved, redirecting to:", data.redirect_url);
       // Redirect to client app - approved
       window.location.href = data.redirect_url
     }
@@ -66,8 +75,10 @@ export default function OAuthConsent() {
     const { data, error } = await supabase.auth.oauth.denyAuthorization(authorizationId)
 
     if (error) {
+      console.log("Error denying authorization:", error);
       setError(error.message)
     } else {
+      console.log("Authorization denied, redirecting to:", data.redirect_url);
       // Redirect to client app - denied
       window.location.href = data.redirect_url
     }
