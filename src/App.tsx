@@ -6,47 +6,21 @@ import OAuthConsent from './OAuthConsent';
 import Login from './Login';
 import './App.css';
 
-/*
-Where to Place Console Logs
-- Inside a Component Body: 
-  Placing a log directly in the function body will trigger every time the component renders.
-
-  - Inside Event Handlers: Use logs within functions like onClick or onChange to capture 
-    user interactions and the resulting data.
-
-  - Inside useEffect: This is the most accurate way to log state changes in functional 
-    components, as it runs after the DOM has been updated.
-
-` - Inside JSX (Expressions): To log within a return statement, wrap the log in an 
-    expression: {console.log("Rendering...")}. Note that this will return undefined to the DOM. 
-
-*/
-
 const MainApp: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams()
-  const authorizationId = searchParams.get('authorization_id')
   // Get redirect URL from query params
   const redirectTo = searchParams.get('redirect') || '/';
 
   useEffect(() => {
-    async function loadAuthDetails() {
-      if (authorizationId) {
-        console.log("Authorization ID found in query params:", authorizationId);
-        // Handle auto-approved authorization_id?
-      }
-    }
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log("Current user:", user);
       if (user) {
-        console.log("User is authenticated, navigating to:", redirectTo);
         navigate(redirectTo);
       }
     };
-    loadAuthDetails()
     checkUser();
-  }, [navigate, authorizationId, redirectTo]);
+  }, [navigate, redirectTo]);
 
   return (
     <main>
@@ -70,13 +44,12 @@ const DefaultRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 // Component that determines if route should be protected or public
 const RouteManager: React.FC = () => {
   const location = useLocation();
-  console.log("Current location:", location.pathname);
   
-  // Check if current route should be handled by components (OAuthConsent and Login)
-  const isPublicRoute = location.pathname.startsWith('/oauth/consent') || location.pathname.startsWith('/login');
-  console.log("Is public route:", isPublicRoute);
+  // Check if current route should be handled by components (OAuthConsent or Login)
+  const isCustomRoute = location.pathname.startsWith('/oauth/consent') 
+    || location.pathname.startsWith('/login');
 
-  if (isPublicRoute) {
+  if (isCustomRoute) {
     return (
       <Routes>
         <Route path="/oauth/consent" element={<OAuthConsent />} />
